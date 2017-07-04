@@ -118,6 +118,20 @@ class MyPDO
         $this->getPDOError();
         return $result;
     }
+
+    public static function batchInsert($table,$field,$values)
+    {
+         $str = '';
+         if(!empty($values)){
+            foreach($values as $val){
+                $str.= '('.implode(',',$val).'),';
+            }
+            $str = rtrim($str,',');
+         }
+         $strSql = 'INSERT INTO '."`$table` (".implode(',',$field).') VALUES '. $str;
+         
+         return $strSql; 
+    }
     
     /**
      * Replace 覆盖方式插入
