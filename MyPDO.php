@@ -119,18 +119,19 @@ class MyPDO
         return $result;
     }
 
-    public static function batchInsert($table,$field,$values)
+    public function batchInsert($table,$field,$values)
     {
          $str = '';
          if(!empty($values)){
             foreach($values as $val){
-                $str.= '('.implode(',',$val).'),';
+                $str.= '("'.implode('","',$val).'"),';
             }
             $str = rtrim($str,',');
          }
          $strSql = 'INSERT INTO '."`$table` (".implode(',',$field).') VALUES '. $str;
-         
-         return $strSql; 
+         $result = $this->dbh->exec($strSql);
+         $this->getPDOError();
+         return $result;
     }
     
     /**
@@ -244,7 +245,7 @@ class MyPDO
     /**
      * beginTransaction 事务开始
      */
-    private function beginTransaction()
+    public function beginTransaction()
     {
         $this->dbh->beginTransaction();
     }
@@ -252,7 +253,7 @@ class MyPDO
     /**
      * commit 事务提交
      */
-    private function commit()
+    public function commit()
     {
         $this->dbh->commit();
     }
@@ -260,7 +261,7 @@ class MyPDO
     /**
      * rollback 事务回滚
      */
-    private function rollback()
+    public function rollback()
     {
         $this->dbh->rollback();
     }

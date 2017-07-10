@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="./source/bootstrap/css/bootstrap.css">
+	<!-- <link rel="stylesheet" type="text/css" href="./source/webuploader/webuploader.css"> -->
+	<script src="./source/jquery-3.2.1.min.js"></script>
+	<script src="./source/layer/layer/layer.js"></script>
+	<script>
+
+		window.onload = function(){
+
+			$('form').submit(function(e){
+				var files = $('.upload-btn').get(0).files,
+					formData = new FormData();
+				var e = window.event || e;
+				if(e.preventDefault){
+					e.preventDefault();
+				}else{
+					e.returnValue = false;
+				}
+
+				//检测文件有没有上传
+				if(files.length == 0){
+					layer.msg('请上传文件');
+					return false;
+				}
+
+				//检测是不是指定类型的文件
+				if(!/^application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet$/.test(files[0].type)){
+					layer.msg('不是有效的excel文件');
+					return false;
+				}
+
+				formData.append('excel',files[0]);
+				var index;
+				$.ajax({
+					type : 'POST',
+					url  : './upload.php',
+					data : formData,
+					async : true,
+					processData: false,
+					contentType: false,  
+					dataType:'json',
+
+					beforeSend : function(){
+						index = layer.load(2, {
+						  shade: [0.1,'#fff'] //0.1透明度的白色背景
+						});
+					},
+
+					success:function(data){
+						layer.close(index);
+						if(data.code == 200){
+							layer.alert('文件上传成功',function(){
+								layer.closeAll();
+								$('.mt_50').addClass('hide');
+								$('.import').removeClass('hide');
+							});
+							
+						}else{
+							layer.alert('文件上传失败');
+						}
+					}
+
+				})
+			})
+
+			$('.import a').click(function(){
+				var href = $(this).data('href');
+				var index;
+				$.ajax({
+					url : href,
+					beforeSend : function(){
+						index = layer.load(2, {
+						  shade: [0.1,'#fff'] //0.1透明度的白色背景
+						});
+					},
+					success :function(data){
+						layer.close(index);
+						layer.alert(data);
+					}
+				})
+			})
+		}
+	</script>
+	<style>
+		.col-center-block {  
+		    float: none!important;  
+		    display: block;  
+		    margin-left: auto;  
+		    margin-right: auto;  
+		} 
+
+		.upload-div{
+			position: relative;
+			height:50px;
+		}
+		.upload-btn{
+			position:absolute;
+			z-index:0;
+		} 
+		.upload-btn:hover,.upload-div input:hover{
+			cursor:pointer;
+		}
+		.upload-div input{
+			opacity:0;
+			z-index:20000;
+			width: 82px;
+			height:34px;
+		}
+		.mt_50{
+			margin-top:50px;
+		}
+
+	</style>
+</head>
+<body>
+	<div class="container" style="border:1px solid #ccc">
+		<form action="./import_data.php"  class="col-center-block">
+			<div class="row">
+				<div class="col-md-6 col-center-block">
+					<h3 class="">请选择你要导入的excel表格</h3>
+					<div class="row mt_50">
+						<div class="col-md-4">
+						    <!--用来存放文件信息-->
+						    <div class="upload-div">
+								 <input type="file" class="upload-btn">
+						   		 <span class="btn btn-info upload-btn">上传excel</span>
+						    </div>
+						</div>
+						<div class="col-md-4 text-center">
+							<button class="btn btn-default" type="submit">上传文件</button>
+						</div>
+					</div>
+					<div class="import row hide">
+						<a class="btn btn-primary" data-href="./import_data.php?sheet=2" style="margin-right:50px">导入sheet2数据</a>
+						<a class="btn btn-info" data-href="./import_data.php?sheet=3">导入sheet3数据</a>
+					</div>
+					
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<!--异常的-->
+<!-- 	<div class="container">
+		
+	</div> -->
+</body>
+</html>
